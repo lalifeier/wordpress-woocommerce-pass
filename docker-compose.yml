@@ -1,0 +1,61 @@
+version: "3"
+
+networks:
+  app_net:
+    external: true
+
+services:
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: 33333
+        WORDPRESS_VERSION: 6.4.3
+        PHP_VERSION: 8.3
+    # image: wordpress
+    container_name: wordpress
+    ports:
+      - 8080:80
+    networks:
+      - app_net
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: lalifeir
+      WORDPRESS_DB_PASSWORD: 123456
+      WORDPRESS_DB_NAME: wordpress_db
+      # WORDPRESS_DEBUG: 1
+      WORDPRESS_URL: "https://8080-lalifeier-wordpresswooc-7swov6gnmwi.ws-us110.gitpod.io"
+      # WORDPRESS_CONFIG_EXTRA: |
+    volumes:
+      # - ./wordpress:/var/www/html
+      - ./data/apache2/log:/var/log/apache2
+      # - ./themes:/var/www/html/wp-content/themes/
+      # - ./plugins:/var/www/html/wp-content/plugins/
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - 3306:3306
+    networks:
+      - app_net
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_DATABASE: wordpress_db
+      MYSQL_USER: lalifeir
+      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: 123456
+    # volumes:
+    #   - ./data/mysql/conf.d:/etc/mysql/conf.d
+    #   - ./data/mysql/data:/var/lib/mysql
+    # - ./data/mysql/logs:/var/log/mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
